@@ -1,69 +1,62 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState("");
-  const [isSuperUser, setIsSuperUser] = useState(false);
+  const { user, logout, setLocale, language, t } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const role = localStorage.getItem("user_role");
-    const superUser = localStorage.getItem("is_superuser") === "true";
-    if (token) {
-      setIsLoggedIn(true);
-      setUserRole(role);
-      setIsSuperUser(superUser);
-    }
-  }, []);
 
   const toggleMenu = () => setMenuOpen(v => !v);
   const closeMenu = () => setMenuOpen(false);
 
   const handleLogout = () => {
-    ["access_token", "refresh_token", "user_role", "user_name", "is_superuser"].forEach(k => localStorage.removeItem(k));
-    setIsLoggedIn(false);
-    setIsSuperUser(false);
+    logout();
     closeMenu();
     navigate("/login");
   };
 
+  const languageToggle = () => setLocale(language === "en" ? "hi" : "en");
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-success">
       <div className="container">
-        <Link className="navbar-brand" to="/">Farmers Portal</Link>
+        <Link className="navbar-brand" to="/">{t("heroTitle")}</Link>
         <button className="navbar-toggler" onClick={toggleMenu} type="button" aria-label="Toggle menu">
           <span className="navbar-toggler-icon" />
         </button>
 
         <div className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`}>
           <ul className="navbar-nav ms-auto">
-            {!isLoggedIn ? (
+            {!user ? (
               <>
-                <li className="nav-item"><Link className="nav-link" to="/" onClick={closeMenu}>Home</Link></li>
-                <li className="nav-item"><Link className="nav-link" to="/contact" onClick={closeMenu}>Contact</Link></li>
-                <li className="nav-item"><Link className="nav-link" to="/login" onClick={closeMenu}>Log In</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/" onClick={closeMenu}>{t("home")}</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/contact" onClick={closeMenu}>{t("contact")}</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/login" onClick={closeMenu}>{t("login")}</Link></li>
               </>
             ) : (
               <>
-                {isSuperUser ? (
+                {user.role === "admin" ? (
                   <>
-                    <li className="nav-item"><Link className="nav-link" to="/admin-dashboard" onClick={closeMenu}>Admin Dashboard</Link></li>
-                    <li className="nav-item"><Link className="nav-link" to="/contact" onClick={closeMenu}>Contact</Link></li>
+                    <li className="nav-item"><Link className="nav-link" to="/admin-dashboard" onClick={closeMenu}>{t("adminDashboard")}</Link></li>
+                    <li className="nav-item"><Link className="nav-link" to="/contact" onClick={closeMenu}>{t("contact")}</Link></li>
                   </>
                 ) : (
                   <>
-                    {userRole === "teacher" && <li className="nav-item"><Link className="nav-link" to="/teacher-dashboard" onClick={closeMenu}>Teacher Dashboard</Link></li>}
-                    {userRole === "student" && <li className="nav-item"><Link className="nav-link" to="/student-dashboard" onClick={closeMenu}>Student Dashboard</Link></li>}
-                    <li className="nav-item"><Link className="nav-link" to="/contact" onClick={closeMenu}>Contact</Link></li>
+                    {user.role === "teacher" && <li className="nav-item"><Link className="nav-link" to="/teacher-dashboard" onClick={closeMenu}>{t("teacherDashboard")}</Link></li>}
+                    {user.role === "student" && <li className="nav-item"><Link className="nav-link" to="/student-dashboard" onClick={closeMenu}>{t("studentDashboard")}</Link></li>}
+                    <li className="nav-item"><Link className="nav-link" to="/plot-registration" onClick={closeMenu}>{t("plotRegistration")}</Link></li>
                   </>
                 )}
                 <li className="nav-item">
-                  <button className="btn btn-outline-light ms-2" onClick={handleLogout}>Logout</button>
+                  <button className="btn btn-outline-light ms-2" onClick={handleLogout}>{t("logout")}</button>
                 </li>
               </>
             )}
+            <li className="nav-item ms-2">
+              <button className="btn btn-sm btn-light" onClick={languageToggle} aria-label="Toggle language">
+                {language === "en" ? "हिन्दी" : "English"}
+              </button>
+            </li>
           </ul>
         </div>
       </div>
