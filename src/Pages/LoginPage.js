@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Sprout } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const navigate = useNavigate();
+  const { login, t, isOffline } = useAuth();
 
   const handleLogin = () => {
     if (credentials.email && credentials.password) {
-      // replace with real auth flow
-      navigate('/register');
+      login({ email: credentials.email, role: credentials.email.includes('admin') ? 'admin' : 'student' });
+      navigate('/');
     } else {
-      alert('कृपया सभी फील्ड भरें / Please fill all fields');
+      alert(`${t('loginHint')} / ${t('loginCta')}`);
     }
   };
 
@@ -29,6 +31,11 @@ export default function LoginPage() {
       }}
     >
       <div className="container" style={{ maxWidth: 920 }}>
+        {isOffline && (
+          <div className="alert alert-warning text-center" role="status">
+            {t('offlineHint')}
+          </div>
+        )}
         <div className="row justify-content-center">
           <div className="col-12 col-md-8">
             <div className="text-center mb-4">
@@ -38,8 +45,8 @@ export default function LoginPage() {
               >
                 <Sprout size={48} className="text-success" />
               </div>
-              <h1 className="display-6 fw-bold text-white mt-3">किसान पोर्टल</h1>
-              <p className="text-white-50 mb-0">Empowering Indian Farmers</p>
+              <h1 className="display-6 fw-bold text-white mt-3">{t('heroTitle')}</h1>
+              <p className="text-white-50 mb-0">{t('heroSubtitle')}</p>
             </div>
 
             <div className="card shadow-lg rounded-4 overflow-hidden">
@@ -50,7 +57,7 @@ export default function LoginPage() {
                 >
                   <div className="d-flex gap-2 mb-3">
                     <button className="btn btn-success flex-fill fw-semibold">
-                      Login
+                      {t('login')}
                     </button>
                     <Link
                       to="/signup"
@@ -64,7 +71,7 @@ export default function LoginPage() {
                   <div className="mb-3">
                     <label className="form-label fw-semibold d-flex align-items-center gap-2 text-success mb-2">
                       <Mail size={18} />
-                      Email / मोबाइल
+                      {t('emailLabel')}
                     </label>
                     <div className="input-group">
                       <input
@@ -84,7 +91,7 @@ export default function LoginPage() {
                   <div className="mb-3">
                     <label className="form-label fw-semibold d-flex align-items-center gap-2 text-success mb-2">
                       <Lock size={18} />
-                      Password / पासवर्ड
+                      {t('passwordLabel')}
                     </label>
                     <input
                       type="password"
@@ -103,7 +110,7 @@ export default function LoginPage() {
                     onClick={handleLogin}
                     className="btn btn-success w-100 fw-bold mt-2"
                   >
-                    Login / लॉगिन करें
+                    {t('loginCta')} / {t('login')}
                   </button>
                 </div>
 
